@@ -3,338 +3,406 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SHIP 4F GALLERY — Interior Curation</title>
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <title>NASフォルダ検索（ローカルHTML）</title>
   <style>
-    :root{
-      --bg:#0f1115;
-      --card:#12151c;
-      --muted:#9aa3b2;
-      --ink:#e8ecf3;
-      --accent:#8ee6d7;     /* ミント系アクセント */
-      --accent2:#ffd27d;    /* アンバー */
-      --radius:18px;
-      --gap:18px;
-      --shadow:0 10px 30px rgb(0 0 0 / .35);
-      --glass:linear-gradient(180deg, rgb(255 255 255 / .06), rgb(255 255 255 / .02));
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:"Outfit","Noto Sans JP",system-ui,-apple-system;
-      background:
-        radial-gradient(1200px 600px at 10% -10%, #1b2431 0%, transparent 50%),
-        radial-gradient(1000px 800px at 100% 10%, #1a2e2b 0%, transparent 40%),
-        var(--bg);
-      color:var(--ink);
-      letter-spacing:.02em;
-    }
-
-    /* ====== Header / Hero ====== */
-    .hero{
-      position:relative;
-      padding:18vh 6vw 14vh;
-      overflow:hidden;
-      display:grid;
-      grid-template-columns: 1.3fr .7fr;
-      gap: clamp(18px, 3vw, 40px);
-      align-items:end;
-    }
-    .hero::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background:
-        radial-gradient(800px 400px at 10% 20%, rgb(142 230 215 / .18), transparent 60%),
-        radial-gradient(600px 300px at 80% 0%, rgb(255 210 125 / .14), transparent 60%);
-      filter: blur(20px);
-      z-index:-1;
-    }
-    .badge{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 14px; border-radius:999px;
-      background:rgb(255 255 255 / .06); backdrop-filter: blur(8px);
-      border:1px solid rgb(255 255 255 / .12);
-      color:var(--muted); font-weight:600; font-size:12px; letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .title{
-      margin:14px 0 10px;
-      line-height:1.04;
-      font-weight:800;
-      font-size:clamp(38px, 7vw, 76px);
-      letter-spacing:.01em;
-    }
-    .lead{
-      font-size:clamp(14px, 1.65vw, 18px);
-      color:var(--muted);
-      max-width:64ch;
-    }
-    .hero-card{
-      border-radius: var(--radius);
-      background: var(--glass);
-      border:1px solid rgb(255 255 255 / .12);
-      box-shadow: var(--shadow);
-      padding:22px;
-    }
-    .hero-grid{
-      display:grid; grid-template-columns:1fr 1fr; gap:var(--gap);
-      margin-top:10px;
-    }
-    .hero-grid img{
-      width:100%; height:220px; object-fit:cover; border-radius:14px;
-      filter:saturate(1.05); transition: transform .6s ease, filter .6s ease;
-    }
-    .hero-grid img:hover{ transform: translateY(-6px) scale(1.02); filter:saturate(1.2) brightness(1.05); }
-
-    /* ====== Sticky side nav ====== */
-    .wrap{ display:grid; grid-template-columns:270px 1fr; gap:32px; padding:0 6vw 12vh; }
-    .side{
-      position:sticky; top:24px; align-self:start;
-      padding:18px; border-radius: var(--radius);
-      background: rgb(255 255 255 / .04); border:1px solid rgb(255 255 255 / .1);
-    }
-    .side h3{ margin:6px 8px 12px; font-size:13px; color:var(--muted); font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
-    .side a{
-      display:flex; align-items:center; gap:10px;
-      padding:12px 12px; margin:2px 0; border-radius:12px; text-decoration:none;
-      color:var(--ink); border:1px solid transparent;
-      transition: background .2s ease, transform .12s ease, border-color .2s ease;
-    }
-    .side a::before{ content:"●"; font-size:.6em; color:var(--accent2); }
-    .side a:hover{ background:rgb(255 255 255 / .06); transform:translateX(4px); border-color:rgb(255 255 255 / .08); }
-
-    /* ====== Section cards / Masonry ====== */
-    section{ scroll-margin-top:90px; }
-    .section-head{
-      display:flex; align-items:baseline; justify-content:space-between; gap:16px;
-      margin: 52px 0 18px;
-    }
-    .section-head h2{
-      margin:0; font-size: clamp(22px, 2.6vw, 34px);
-      letter-spacing:.02em;
-    }
-    .hint{ color:var(--muted); font-size:14px }
-
-    .masonry{
-      column-count: 1;
-      column-gap: var(--gap);
-    }
-    @media (min-width: 700px){ .masonry{ column-count: 2; } }
-    @media (min-width: 1100px){ .masonry{ column-count: 3; } }
-
-    .card{
-      break-inside: avoid; margin:0 0 var(--gap);
-      border-radius: var(--radius);
-      background: var(--card); border:1px solid rgb(255 255 255 / .08);
-      overflow:hidden; box-shadow: var(--shadow);
-      transform: translateY(8px); opacity:0; transition: transform .7s ease, opacity .7s ease;
-    }
-    .card.reveal{ transform:none; opacity:1; }
-    .card figure{ margin:0; position:relative; }
-    .card img{ width:100%; height:auto; display:block; }
-    .chip{
-      position:absolute; left:12px; top:12px;
-      padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700;
-      background:rgba(16,18,25,.8); color:var(--accent); border:1px solid rgb(255 255 255 / .14);
-      backdrop-filter: blur(6px);
-    }
-    .card .body{ padding:16px 16px 18px; }
-    .card h3{ margin:0 0 6px; font-size:18px }
-    .meta{ color:var(--muted); font-size:13px; }
-
-    /* ====== Footer ====== */
-    footer{
-      padding:60px 6vw 90px;
-      color:var(--muted);
-    }
-    .credit{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      background:rgb(255 255 255 / .05);
-      border:1px solid rgb(255 255 255 / .08);
-      border-radius:14px; padding:12px 14px;
-    }
-    .credit a{ color:var(--accent); text-decoration:none; }
-    /* nice focus */
-    a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:10px }
+    :root { --bg:#0f172a; --panel:#111827; --muted:#475569; --text:#e5e7eb; --accent:#22c55e; --accent2:#38bdf8; }
+    html,body{height:100%;}
+    body{margin:0;background:linear-gradient(180deg,#0b1024,#0e152f);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"}
+    .wrap{max-width:1100px;margin:40px auto;padding:0 20px}
+    .card{background:rgba(17,24,39,.7);backdrop-filter:saturate(140%) blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.35)}
+    .header{display:flex;gap:14px;align-items:center;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+    h1{font-size:20px;margin:0}
+    .body{padding:16px 20px}
+    label{display:block;font-size:12px;color:#93a4b8;margin:6px 0}
+    input[type="text"], input[type="number"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #233047;background:#0b1220;color:var(--text);outline:none}
+    input[type="text"]:focus{border-color:#3754f5;box-shadow:0 0 0 3px rgba(56,189,248,.2)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+    .btn{appearance:none;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,#22c55e,#16a34a);color:#08210f}
+    .btn-secondary{background:#0b1220;color:#c7d2fe;border:1px solid #1f2a44}
+    .btn-danger{background:#7f1d1d;color:#fff;border:1px solid #b91c1c}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .hint{font-size:12px;color:#9fb1c7}
+    .switch{display:flex;align-items:center;gap:8px}
+    .progress{height:10px;background:#0b1220;border-radius:999px;overflow:hidden;border:1px solid #1f2a44}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#22c55e)}
+    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .table th{font-size:12px;color:#9fb1c7;text-align:left;padding:6px 8px}
+    .table td{background:#0b1220;border:1px solid #1f2a44;padding:8px;border-left:none;border-right:none}
+    .table tr td:first-child{border-radius:10px 0 0 10px;border-left:1px solid #1f2a44}
+    .table tr td:last-child{border-radius:0 10px 10px 0;border-right:1px solid #1f2a44}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;border:1px solid #1f2a44;background:#0b1220;color:#cbd5e1}
+    .highlight{background:rgba(250,204,21,.25);outline:1px solid rgba(250,204,21,.35);border-radius:4px}
+    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;color:#93a4b8;font-size:12px}
+    .hidden{display:none}
+    .small{font-size:12px}
+    kbd{background:#111827;border:1px solid #1f2a44;border-bottom-color:#0b1220;border-radius:6px;padding:2px 6px}
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div class="dot"></div>
+        <h1>NAS フォルダ検索（ブラウザだけで実行）</h1>
+      </div>
+      <div class="body">
+        <p class="hint">Chrome / Edge など <strong>File System Access API</strong> 対応ブラウザ推奨（https もしくは localhost）。<br>「フォルダを選択」から <code>\\192.168.10.101\... </code>（ネットワークドライブ割当済みでもOK）を選べます。セキュリティ上、<strong>テキストのパス入力だけではアクセスできません</strong>。必ずダイアログで許可してください。</p>
 
-  <!-- ========= HERO ========= -->
-  <header class="hero" aria-label="メインビジュアル">
-    <div>
-      <span class="badge">Interior Gallery</span>
-      <h1 class="title">SHIP 4F<br>フォトギャラリー</h1>
-      <p class="lead">
-        話す・つくる・集うが心地よくつながる場所。<br>
-        館内の主要エリアをフォトダイジェストでご紹介します。
-      </p>
-    </div>
-    <div class="hero-card">
-      <div class="hero-grid">
-        <img loading="lazy" alt="オープンラウンジ（入口側）" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/efffb3a9467e28a3ba69bd61bf43025a.jpg">
-        <img loading="lazy" alt="オープンラウンジ（奥側）"     src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/f91444bf3338a33d507eed071ce4ae73.jpg">
-        <img loading="lazy" alt="集中ブース（窓側）"         src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/DSC_5813.jpg">
-        <img loading="lazy" alt="集中ブース（壁側）"         src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/DSC_5768.jpg">
+        <div class="row">
+          <div>
+            <label>検索フォルダパス（表示用）</label>
+            <input id="folderPath" type="text" placeholder="選択したフォルダのパスが表示されます" readonly>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button class="btn btn-primary" id="pickBtn">フォルダを選択</button>
+              <label class="btn btn-secondary" for="folderInput">フォルダ選択（互換モード）</label>
+              <input id="folderInput" type="file" webkitdirectory directory multiple class="hidden">
+            </div>
+            <div class="hint small">※ 互換モードは Safari/Firefox 向け（内容検索はテキスト系のみ）。</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>検索ワード</label>
+            <input id="query" type="text" placeholder="例：議事録 2025 / 見積 *.xlsx / 正規表現: ^請求.*(2024|2025)$">
+          </div>
+          <div>
+            <label>検索設定</label>
+            <div class="actions">
+              <label class="switch"><input id="fulltext" type="checkbox"> 本文検索する（テキスト系のみ）</label>
+              <label class="switch"><input id="caseSens" type="checkbox"> 大文字小文字を区別</label>
+              <label class="switch"><input id="regex" type="checkbox"> 正規表現</label>
+            </div>
+            <div class="hint small">対象拡張子（本文検索）：txt, md, csv, log, json, html, js, css（PDFやOfficeは追加プラグインで対応可）</div>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label>最大ファイルサイズ（MB・本文検索時）</label>
+            <input id="maxSize" type="number" min="1" step="1" value="10">
+          </div>
+          <div>
+            <label>除外パターン（; 区切り・ワイルドカード可）</label>
+            <input id="exclude" type="text" value="$RECYCLE.BIN;~$*;*.tmp;node_modules;@eaDir">
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button class="btn btn-secondary" id="exportBtn" disabled>結果をCSVで保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-primary" id="searchBtn">検索</button>
+          <button class="btn btn-danger" id="cancelBtn" disabled>中止</button>
+        </div>
+
+        <div style="margin:14px 0" class="progress"><div class="bar" id="bar"></div></div>
+        <div class="footer"><div id="status">未実行</div><div id="caps" class="hint">ヒント：<kbd>Ctrl</kbd>+<kbd>F</kbd> で結果内検索</div></div>
+
+        <div style="margin-top:16px;overflow:auto">
+          <table class="table" id="resultTable">
+            <thead>
+              <tr>
+                <th>ファイル名</th>
+                <th>相対パス</th>
+                <th>サイズ</th>
+                <th>更新日</th>
+                <th>一致スニペット</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <details style="margin-top:14px">
+          <summary>制約・補足</summary>
+          <ul class="small">
+            <li>ブラウザの仕様上、<strong>ユーザーが明示的に選んだフォルダ内</strong>しか読み取れません（セキュリティ保護）。テキストボックスのパス入力だけではアクセス不可。</li>
+            <li>File System Access API は Chromium 系（Chrome / Edge）で安定。Safari/Firefox は「互換モード（ディレクトリアップロード）」で対応します。</li>
+            <li>本文検索はテキスト系拡張子に限定。PDF/Office（docx/xlsx/pptx 等）は別途ライブラリ（pdf.js、mammoth など）を組み込めます。</li>
+            <li>NAS への負荷を避けるため大容量ファイルはスキップ推奨。必要に応じてサイズ上限を調整してください。</li>
+          </ul>
+        </details>
       </div>
     </div>
-  </header>
-
-  <!-- ========= BODY ========= -->
-  <main class="wrap">
-    <!-- Sticky side nav -->
-    <nav class="side" aria-label="セクション内ナビ">
-      <h3>Jump to</h3>
-      <a href="#reception">受付</a>
-      <a href="#lounge">オープンラウンジ</a>
-      <a href="#meeting">会議室（第1〜第3）</a>
-      <a href="#office">オフィスエリア</a>
-      <a href="#factory">工房</a>
-    </nav>
-
-    <!-- Content -->
-    <div>
-      <!-- 受付 -->
-      <section id="reception">
-        <div class="section-head">
-          <h2>受付</h2>
-          <p class="hint">来館の最初の導線。ご案内・手続きはここから。</p>
-        </div>
-        <div class="masonry">
-          <article class="card">
-            <figure>
-              <span class="chip">RECEPTION</span>
-              <img loading="lazy" alt="受付カウンター" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/efffb3a9467e28a3ba69bd61bf43025a.jpg">
-            </figure>
-            <div class="body">
-              <h3>施設ロゴが目印の正面受付</h3>
-              <p class="meta">職員が常駐。初めての方もお気軽にどうぞ。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- オープンラウンジ -->
-      <section id="lounge">
-        <div class="section-head">
-          <h2>オープンラウンジ</h2>
-          <p class="hint">用途別ゾーニングで「静」と「会話」を両立。</p>
-        </div>
-        <div class="masonry">
-          <article class="card">
-            <figure>
-              <span class="chip">LOUNGE</span>
-              <img loading="lazy" alt="オープンラウンジ全景" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/f91444bf3338a33d507eed071ce4ae73.jpg">
-            </figure>
-            <div class="body">
-              <h3>好きな席を選んで過ごす</h3>
-              <p class="meta">個人作業のほか、対面でのミーティングも可能。</p>
-            </div>
-          </article>
-          <article class="card">
-            <figure>
-              <span class="chip">FOCUS</span>
-              <img loading="lazy" alt="集中ブース（窓側）" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/DSC_5813.jpg">
-            </figure>
-            <div class="body">
-              <h3>集中ブース</h3>
-              <p class="meta">1日最大4時間まで利用可。予約制の個室ブースもあり。</p>
-            </div>
-          </article>
-          <article class="card">
-            <figure>
-              <span class="chip">FOCUS</span>
-              <img loading="lazy" alt="集中ブース（壁側）" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/DSC_5768.jpg">
-            </figure>
-            <div class="body">
-              <h3>静かなワークエリア</h3>
-              <p class="meta">落ち着いた照明と直線的なラインで集中を後押し。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- 会議室 -->
-      <section id="meeting">
-        <div class="section-head">
-          <h2>会議室（第1〜第3）</h2>
-          <p class="hint">規模に応じて選べる3室。備品・レイアウトはご相談ください。</p>
-        </div>
-        <div class="masonry">
-          <article class="card">
-            <figure>
-              <span class="chip">MEETING</span>
-              <img loading="lazy" alt="第1会議室（イメージ）" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/5c8ceb1ad83ca58d2b3c37d35e57bb0a.jpg">
-            </figure>
-            <div class="body">
-              <h3>第1会議室</h3>
-              <p class="meta">モニター常設。研修やセミナーにも最適。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- オフィスエリア -->
-      <section id="office">
-        <div class="section-head">
-          <h2>オフィスエリア</h2>
-          <p class="hint">廊下・居室・フリーエリアの一部をご紹介。</p>
-        </div>
-        <div class="masonry">
-          <article class="card">
-            <figure>
-              <span class="chip">CORRIDOR</span>
-              <img loading="lazy" alt="フリーエリア 共用デスク" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/DSC_5813.jpg">
-            </figure>
-            <div class="body">
-              <h3>フリーエリア</h3>
-              <p class="meta">共用デスクは自由に利用可能。打合せや作業の中継地点に。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- 工房 -->
-      <section id="factory">
-        <div class="section-head">
-          <h2>工房</h2>
-          <p class="hint">作業導線と安全に配慮した、ものづくり空間。</p>
-        </div>
-        <div class="masonry">
-          <article class="card">
-            <figure>
-              <span class="chip">FAB</span>
-              <img loading="lazy" alt="工房イメージ（ラウンジからの導線）" src="https://ship-osaki.jp/wp/wp-content/uploads/2025/10/efffb3a9467e28a3ba69bd61bf43025a.jpg">
-            </figure>
-            <div class="body">
-              <h3>多用途な機器・設備</h3>
-              <p class="meta">3Dプリンタやレーザーカッターを配備。造形相談もご活用ください。</p>
-            </div>
-          </article>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <footer>
-    <div class="credit">
-      <span>写真・文面出典：</span>
-      <a href="https://ship-osaki.jp/space/gallery/" target="_blank" rel="noopener">SHIP 4階フロアギャラリー</a>
-      <span>（直リンク使用 / 権利保持者提供）</span>
-    </div>
-  </footer>
+  </div>
 
   <script>
-    // ふわっと出現
-    const io = new IntersectionObserver(entries=>{
-      entries.forEach(e=>{
-        if(e.isIntersecting){ e.target.classList.add('reveal'); io.unobserve(e.target); }
-      })
-    },{threshold:.18});
-    document.querySelectorAll('.card').forEach(el=>io.observe(el));
+    // ====== ユーティリティ ======
+    const $$ = (sel, el=document) => el.querySelector(sel);
+    const $$$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+
+    const textExt = new Set([".txt",".md",".csv",".log",".json",".html",".htm",".js",".css"]);
+    const toMB = b => (b/1024/1024).toFixed(2)+" MB";
+    const fmtDate = ts => new Date(ts).toLocaleString();
+
+    function wildcardToRegExp(pattern){
+      const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const tokens = pattern.split("*").map(esc).join(".*");
+      return new RegExp("^"+tokens+"$","i");
+    }
+
+    function parseExclude(raw){
+      return raw.split(/[;\n]/).map(s=>s.trim()).filter(Boolean).map(p=>wildcardToRegExp(p));
+    }
+
+    function hitSnippet(text, q, regex, caseSens){
+      try{
+        let re;
+        if(regex){
+          re = new RegExp(q, caseSens?"g":"gi");
+        }else{
+          re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), caseSens?"g":"gi");
+        }
+        const m = re.exec(text);
+        if(!m) return null;
+        const start = Math.max(0, m.index-40);
+        const end = Math.min(text.length, m.index + (m[0]?.length||0) + 60);
+        const snippet = text.slice(start,end)
+          .replace(re, s=>`<span class="highlight">${s}</span>`);
+        return (start>0?"…":"") + snippet + (end<text.length?"…":"");
+      }catch(e){ return null }
+    }
+
+    function hasAllowedTextExt(name){
+      const i = name.lastIndexOf(".");
+      if(i<0) return false;
+      return textExt.has(name.slice(i).toLowerCase());
+    }
+
+    function matchWildcardList(name, list){
+      if(!list?.length) return false;
+      return list.some(re => re.test(name));
+    }
+
+    function downloadCSV(rows){
+      const header = ["name","path","size","mtime","snippet"]; 
+      const esc = v => '"'+ String(v??"").replace(/"/g,'""') +'"';
+      const lines = [header.join(",")].concat(rows.map(r => [r.name, r.path, r.size, r.mtime, r.snippet?.replace(/<[^>]+>/g,"")].map(esc).join(",")));
+      const blob = new Blob(["\ufeff"+lines.join("\n")], {type:"text/csv"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "search_results.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // ====== 状態 ======
+    let dirHandle = null;           // File System Access API
+    let pickedFiles = [];           // 互換モード
+    let abortFlag = { value:false };
+    let results = [];
+
+    // ====== UI 要素 ======
+    const folderPath = $$("#folderPath");
+    const pickBtn = $$("#pickBtn");
+    const folderInput = $$("#folderInput");
+    const query = $$("#query");
+    const fulltext = $$("#fulltext");
+    const caseSens = $$("#caseSens");
+    const regex = $$("#regex");
+    const maxSize = $$("#maxSize");
+    const exclude = $$("#exclude");
+    const searchBtn = $$("#searchBtn");
+    const cancelBtn = $$("#cancelBtn");
+    const statusEl = $$("#status");
+    const bar = $$("#bar");
+    const tableBody = $$("#resultTable tbody");
+    const exportBtn = $$("#exportBtn");
+
+    // ====== フォルダ選択（File System Access API） ======
+    pickBtn.addEventListener("click", async () => {
+      if(!window.showDirectoryPicker){
+        alert("このブラウザはディレクトリ選択APIに未対応です。『互換モード』をご利用ください。");
+        return;
+      }
+      try{
+        dirHandle = await showDirectoryPicker({ mode:"read" });
+        pickedFiles = [];
+        folderPath.value = dirHandle.name || "(選択済み)";
+        statusEl.textContent = "フォルダ選択完了。検索ワードを入力してください。";
+      }catch(e){
+        if(e?.name !== 'AbortError') console.error(e);
+      }
+    });
+
+    // ====== 互換モード（input webkitdirectory） ======
+    folderInput.addEventListener("change", () => {
+      pickedFiles = [...folderInput.files];
+      dirHandle = null;
+      if(pickedFiles.length){
+        const commonPath = pickedFiles[0].webkitRelativePath?.split("/")?.[0] ?? "(選択済み)";
+        folderPath.value = commonPath + "（互換モード）";
+        statusEl.textContent = `${pickedFiles.length} 件のファイルを読み込みました`;
+      }
+    });
+
+    // ====== 検索処理 ======
+    async function* walkDirectory(handle, excludeList){
+      for await (const [name, entry] of handle.entries()){
+        if(abortFlag.value) return;
+        if(matchWildcardList(name, excludeList)) continue;
+        if(entry.kind === 'directory'){
+          if(matchWildcardList(entry.name, excludeList)) continue;
+          yield* walkDirectory(entry, excludeList);
+        }else if(entry.kind === 'file'){
+          if(matchWildcardList(entry.name, excludeList)) continue;
+          yield entry;
+        }
+      }
+    }
+
+    async function runSearch(){
+      const qRaw = query.value.trim();
+      if(!qRaw){ alert("検索ワードを入力してください。"); return; }
+      if(!dirHandle && pickedFiles.length===0){ alert("フォルダを選択してください。"); return; }
+
+      results = []; tableBody.innerHTML = ""; exportBtn.disabled = true;
+      abortFlag.value = false; cancelBtn.disabled = false; searchBtn.disabled = true; bar.style.width = '0%';
+      const excludeList = parseExclude(exclude.value);
+
+      const isRegex = regex.checked; const isCase = caseSens.checked; const isFull = fulltext.checked;
+      let nameMatcher, contentMatcher;
+      try{
+        if(isRegex){
+          nameMatcher = new RegExp(qRaw, isCase?"":"i");
+          contentMatcher = new RegExp(qRaw, isCase?"g":"gi");
+        }else{
+          const esc = qRaw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          nameMatcher = new RegExp(esc, isCase?"":"i");
+          contentMatcher = new RegExp(esc, isCase?"g":"gi");
+        }
+      }catch(e){ alert("正規表現が不正です: "+e.message); resetUI(); return; }
+
+      let total = 0, processed = 0, matched = 0;
+
+      // 先に総件数（ざっくり）—互換モードは既知、FS APIは概算しない（進捗は相対表示）
+      if(pickedFiles.length){ total = pickedFiles.length; }
+
+      statusEl.textContent = "検索中…";
+
+      const rows = [];
+
+      async function processFileLike(getFile, relPath){
+        if(abortFlag.value) return;
+        try{
+          const file = await getFile();
+          processed++;
+          if(!file) return;
+          const name = file.name;
+          const size = file.size;
+          const mtime = file.lastModified;
+          if(matchWildcardList(name, excludeList)) return;
+
+          // 名前・パス一致
+          let nameHit = nameMatcher.test(name) || nameMatcher.test(relPath||"");
+
+          let snippet = null;
+          if(isFull && hasAllowedTextExt(name)){
+            const maxBytes = Number(maxSize.value || 10) * 1024 * 1024;
+            if(size <= maxBytes){
+              const text = await file.text();
+              if(contentMatcher.test(text)){
+                nameHit = true;
+                snippet = hitSnippet(text, qRaw, isRegex, isCase);
+              }
+            }
+          }
+
+          if(nameHit){
+            matched++;
+            rows.push({ name, path: relPath||name, size: file.size, mtime: fmtDate(mtime), file, snippet });
+            appendRow(rows[rows.length-1]);
+          }
+
+          if(total){
+            bar.style.width = Math.min(100, Math.floor((processed/total)*100))+"%";
+          }
+          statusEl.textContent = `${processed} 件処理 / 一致 ${matched} 件`;
+        }catch(e){ console.error(e); }
+      }
+
+      if(dirHandle){
+        // File System Access API 経路
+        let i=0;
+        for await (const entry of walkDirectory(dirHandle, excludeList)){
+          if(abortFlag.value) break;
+          const rel = entry.name; // 深いパスは後で解決
+          await processFileLike(async ()=> await entry.getFile(), rel);
+          i++;
+          if(i % 25 === 0){ await new Promise(r => setTimeout(r)); }
+        }
+      }else{
+        // 互換モード（input webkitdirectory）
+        total = pickedFiles.length;
+        for(const f of pickedFiles){
+          if(abortFlag.value) break;
+          await processFileLike(async ()=> f, f.webkitRelativePath || f.name);
+        }
+      }
+
+      exportBtn.disabled = rows.length === 0;
+      statusEl.textContent = `完了：一致 ${matched} 件`;
+      resetUI();
+    }
+
+    function resetUI(){ cancelBtn.disabled = true; searchBtn.disabled = false; }
+
+    function appendRow(r){
+      const tr = document.createElement('tr');
+      const td = (html) => { const c=document.createElement('td'); c.innerHTML = html; return c; };
+      const openBtn = document.createElement('button');
+      openBtn.className = 'btn btn-secondary';
+      openBtn.textContent = '開く/保存';
+      openBtn.addEventListener('click', async ()=>{
+        try{
+          const blob = await r.file.arrayBuffer();
+          const b = new Blob([blob], {type: r.file.type || 'application/octet-stream'});
+          const url = URL.createObjectURL(b);
+          const a = document.createElement('a');
+          a.href = url; a.download = r.name; a.target = '_blank'; a.click();
+          setTimeout(()=>URL.revokeObjectURL(url), 2000);
+        }catch(e){ console.error(e); }
+      });
+
+      tr.appendChild(td(`<span class="badge">${r.name}</span>`));
+      tr.appendChild(td(`<span class="small">${r.path}</span>`));
+      tr.appendChild(td(`<span class="small">${toMB(r.size)}</span>`));
+      tr.appendChild(td(`<span class="small">${r.mtime}</span>`));
+      tr.appendChild(td(`<div class="small">${r.snippet||""}</div>`));
+      const actionTd = td(""); actionTd.appendChild(openBtn); tr.appendChild(actionTd);
+      tableBody.appendChild(tr);
+    }
+
+    // ====== イベント ======
+    searchBtn.addEventListener("click", runSearch);
+    cancelBtn.addEventListener("click", ()=>{ abortFlag.value = true; statusEl.textContent = "中止しました"; resetUI(); });
+    exportBtn.addEventListener("click", ()=>{
+      const rows = $$$('#resultTable tbody tr').map(tr=>{
+        const tds = $$$('td', tr);
+        return {
+          name: tds[0]?.innerText?.trim(),
+          path: tds[1]?.innerText?.trim(),
+          size: tds[2]?.innerText?.trim(),
+          mtime: tds[3]?.innerText?.trim(),
+          snippet: tds[4]?.innerText?.trim(),
+        }
+      });
+      downloadCSV(rows);
+    });
+
+    // Enter実行
+    query.addEventListener('keydown', e=>{ if(e.key==='Enter'){ runSearch(); }});
   </script>
 </body>
 </html>
