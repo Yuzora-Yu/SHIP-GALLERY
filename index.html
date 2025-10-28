@@ -3,481 +3,85 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NASフォルダ検索（ローカルHTML）— PDF / Office 本文対応版</title>
+  <title>NASフォルダ検索（フルパス表示・フォルダオープン版）</title>
   <style>
-    :root { --bg:#0f172a; --panel:#111827; --muted:#475569; --text:#e5e7eb; --accent:#22c55e; --accent2:#38bdf8; }
-    html,body{height:100%;}
-    body{margin:0;background:linear-gradient(180deg,#0b1024,#0e152f);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"}
-    .wrap{max-width:1100px;margin:40px auto;padding:0 20px}
-    .card{background:rgba(17,24,39,.7);backdrop-filter:saturate(140%) blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.35)}
-    .header{display:flex;gap:14px;align-items:center;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
-    h1{font-size:20px;margin:0}
-    .body{padding:16px 20px}
-    label{display:block;font-size:12px;color:#93a4b8;margin:6px 0}
-    input[type="text"], input[type="number"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #233047;background:#0b1220;color:var(--text);outline:none}
-    input[type="text"]:focus{border-color:#3754f5;box-shadow:0 0 0 3px rgba(56,189,248,.2)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-    .btn{appearance:none;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-    .btn-primary{background:linear-gradient(90deg,#22c55e,#16a34a);color:#08210f}
-    .btn-secondary{background:#0b1220;color:#c7d2fe;border:1px solid #1f2a44}
-    .btn-danger{background:#7f1d1d;color:#fff;border:1px solid #b91c1c}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .hint{font-size:12px;color:#9fb1c7}
-    .switch{display:flex;align-items:center;gap:8px}
-    .progress{height:10px;background:#0b1220;border-radius:999px;overflow:hidden;border:1px solid #1f2a44}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#22c55e)}
-    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
-    .table th{font-size:12px;color:#9fb1c7;text-align:left;padding:6px 8px}
-    .table td{background:#0b1220;border:1px solid #1f2a44;padding:8px;border-left:none;border-right:none}
-    .table tr td:first-child{border-radius:10px 0 0 10px;border-left:1px solid #1f2a44}
-    .table tr td:last-child{border-radius:0 10px 10px 0;border-right:1px solid #1f2a44}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;border:1px solid #1f2a44;background:#0b1220;color:#cbd5e1}
-    .highlight{background:rgba(250,204,21,.25);outline:1px solid rgba(250,204,21,.35);border-radius:4px}
-    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;color:#93a4b8;font-size:12px}
-    .hidden{display:none}
-    .small{font-size:12px}
-    kbd{background:#111827;border:1px solid #1f2a44;border-bottom-color:#0b1220;border-radius:6px;padding:2px 6px}
-    .libwarn{color:#fbbf24}
+    body{font-family:system-ui, sans-serif;background:#0b1024;color:#e5e7eb;margin:0;padding:20px}
+    input,button{font:inherit}
+    .btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer}
+    .btn-primary{background:#22c55e;color:#000}
+    .btn-secondary{background:#334155;color:#fff}
+    table{border-collapse:collapse;width:100%;margin-top:10px}
+    th,td{border:1px solid #334155;padding:6px;font-size:13px}
+    .highlight{background:rgba(250,204,21,.25)}
   </style>
-  <!-- ライブラリ：CDN（GitHub Pages対応） -->
-  <!-- PDF.js -->
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.js"></script>
-  <!-- mammoth.js: docx → HTML/Text -->
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-  <!-- SheetJS (xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- JSZip（pptx/汎用OOXML展開に使用） -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div class="dot"></div>
-        <h1>NAS フォルダ検索（ブラウザだけで実行）— PDF / Office 本文対応</h1>
-      </div>
-      <div class="body">
-        <p class="hint">Chrome / Edge 推奨（GitHub Pages でも動作可）。<br>「フォルダを選択」から <code>\\192.168.10.101\...</code> やネットワークドライブを指定して下さい。<br><span class="libwarn">※ PDF/Office の本文検索はファイルをブラウザで解凍・解析するため、テキストに比べ処理が重くなります。</span></p>
-
-        <div class="row">
-          <div>
-            <label>検索フォルダパス（表示用）</label>
-            <input id="folderPath" type="text" placeholder="選択したフォルダのパスが表示されます" readonly>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <div class="actions">
-              <button class="btn btn-primary" id="pickBtn">フォルダを選択</button>
-              <label class="btn btn-secondary" for="folderInput">フォルダ選択（互換モード）</label>
-              <input id="folderInput" type="file" webkitdirectory directory multiple class="hidden">
-            </div>
-            <div class="hint small">Safari/Firefoxは互換モードを利用。</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>検索ワード</label>
-            <input id="query" type="text" placeholder="例：議事録 2025 / 見積 *.xlsx / 正規表現: ^請求.*(2024|2025)$">
-          </div>
-          <div>
-            <label>検索設定</label>
-            <div class="actions">
-              <label class="switch"><input id="fulltext" type="checkbox"> 本文検索する（テキスト/ PDF / docx / xlsx / pptx）</label>
-              <label class="switch"><input id="caseSens" type="checkbox"> 大文字小文字を区別</label>
-              <label class="switch"><input id="regex" type="checkbox"> 正規表現</label>
-            </div>
-            <div class="hint small">サイズ上限や除外パターンは下段で設定できます。</div>
-          </div>
-        </div>
-
-        <div class="row3">
-          <div>
-            <label>最大ファイルサイズ（MB・本文検索時）</label>
-            <input id="maxSize" type="number" min="1" step="1" value="20">
-          </div>
-          <div>
-            <label>除外パターン（; 区切り・ワイルドカード可）</label>
-            <input id="exclude" type="text" value="$RECYCLE.BIN;~$*;*.tmp;node_modules;@eaDir">
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <div class="actions">
-              <button class="btn btn-secondary" id="exportBtn" disabled>結果をCSVで保存</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions" style="margin-top:12px">
-          <button class="btn btn-primary" id="searchBtn">検索</button>
-          <button class="btn btn-danger" id="cancelBtn" disabled>中止</button>
-        </div>
-
-        <div style="margin:14px 0" class="progress"><div class="bar" id="bar"></div></div>
-        <div class="footer"><div id="status">未実行</div><div id="caps" class="hint">ヒント：<kbd>Ctrl</kbd>+<kbd>F</kbd> で結果内検索</div></div>
-
-        <div style="margin-top:16px;overflow:auto">
-          <table class="table" id="resultTable">
-            <thead>
-              <tr>
-                <th>ファイル名</th>
-                <th>相対パス</th>
-                <th>サイズ</th>
-                <th>更新日</th>
-                <th>一致スニペット</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <details style="margin-top:14px">
-          <summary>制約・補足</summary>
-          <ul class="small">
-            <li>ユーザーが選択したフォルダ内のみ読み取り可（ブラウザ仕様）。</li>
-            <li>PDF/Officeの解析はクライアント側で行います。大容量ファイルは時間がかかります。</li>
-            <li>PDFはテキスト抽出不可な「画像だけのPDF」ではヒットしません（OCRは別途拡張が必要）。</li>
-            <li>xlsxはセル文字列（sharedStrings等）を対象、pptxは各スライドのプレーンテキスト（a:t）を対象とします。</li>
-          </ul>
-        </details>
-      </div>
-    </div>
+  <h1>NASフォルダ検索（フルパス表示・フォルダオープン版）</h1>
+  <div>
+    <button id="pickBtn" class="btn btn-primary">フォルダを選択</button>
+    <label><input type="checkbox" id="fulltext"> 本文検索（PDF/Office対応）</label>
+    <input id="query" type="text" placeholder="検索ワード">
+    <button id="searchBtn" class="btn btn-secondary">検索</button>
   </div>
+  <p id="status"></p>
+  <table id="resultTable"><thead><tr><th>ファイル名</th><th>フルパス</th><th>一致スニペット</th><th>操作</th></tr></thead><tbody></tbody></table>
 
-  <script>
-    // ====== PDF.js 初期化 ======
-    if(window['pdfjsLib']){
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.js';
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.js';
+  const $$ = sel => document.querySelector(sel);
+  const textExt = new Set([".txt",".md",".csv",".log",".json"]);
+  const officeExt = new Set([".pdf",".docx",".xlsx",".pptx"]);
+
+  let dirHandle = null;
+  async function extractText(file){
+    const ext=file.name.split('.').pop().toLowerCase();
+    const buf=await file.arrayBuffer();
+    try{
+      if(ext==='pdf'){const pdf=await pdfjsLib.getDocument({data:buf}).promise;let out='';for(let i=1;i<=Math.min(pdf.numPages,30);i++){const page=await pdf.getPage(i);const c=await page.getTextContent();out+=c.items.map(it=>it.str).join(' ');}return out;}
+      if(ext==='docx'){const r=await mammoth.convertToHtml({arrayBuffer:buf});const tmp=document.createElement('div');tmp.innerHTML=r.value;return tmp.textContent;}
+      if(ext==='xlsx'){const wb=XLSX.read(buf,{type:'array'});let out='';wb.SheetNames.forEach(n=>{out+=XLSX.utils.sheet_to_csv(wb.Sheets[n])});return out;}
+      if(ext==='pptx'){const zip=await JSZip.loadAsync(buf);let out='';for(const f of Object.keys(zip.files))if(f.match(/^ppt\/slides\/slide\d+\.xml$/)){const xml=await zip.file(f).async('string');const t=[...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map(m=>m[1]);out+=t.join(' ');}return out;}
+      if(textExt.has('.'+ext)){return new TextDecoder().decode(buf);}
+    }catch(e){console.warn('抽出失敗',e);}
+    return '';
+  }
+
+  async function* walkDirectory(handle){
+    for await(const [name,entry] of handle.entries()){
+      if(entry.kind==='directory'){yield* walkDirectory(entry);} else yield entry;
     }
+  }
 
-    // ====== ユーティリティ ======
-    const $$ = (sel, el=document) => el.querySelector(sel);
-    const $$$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+  function highlight(text,q){const r=new RegExp(q,'i');const m=text.match(r);if(!m)return '';const i=m.index;return '…'+text.slice(Math.max(0,i-30),i)+'<span class="highlight">'+m[0]+'</span>'+text.slice(i+m[0].length,i+m[0].length+30)+'…';}
 
-    const textExt = new Set([".txt",".md",".csv",".log",".json",".html",".htm",".js",".css"]);
-    const officeExt = new Set([".pdf",".docx",".xlsx",".pptx"]);
-    const toMB = b => (b/1024/1024).toFixed(2)+" MB";
-    const fmtDate = ts => new Date(ts).toLocaleString();
+  $$('#pickBtn').onclick=async()=>{dirHandle=await showDirectoryPicker();$$('#status').textContent='選択: '+dirHandle.name;}
 
-    function extOf(name){
-      const i = name.lastIndexOf('.');
-      return i<0 ? '' : name.slice(i).toLowerCase();
-    }
-
-    function wildcardToRegExp(pattern){
-      const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const tokens = pattern.split("*").map(esc).join(".*");
-      return new RegExp("^"+tokens+"$","i");
-    }
-
-    function parseExclude(raw){
-      return raw.split(/[;\n]/).map(s=>s.trim()).filter(Boolean).map(p=>wildcardToRegExp(p));
-    }
-
-    function hitSnippet(text, q, regex, caseSens){
-      try{
-        let re;
-        if(regex){ re = new RegExp(q, caseSens?"g":"gi"); }
-        else{ re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), caseSens?"g":"gi"); }
-        const m = re.exec(text);
-        if(!m) return null;
-        const start = Math.max(0, m.index-40);
-        const end = Math.min(text.length, m.index + (m[0]?.length||0) + 60);
-        const snippet = text.slice(start,end).replace(re, s=>`<span class="highlight">${s}</span>`);
-        return (start>0?"…":"") + snippet + (end<text.length?"…":"");
-      }catch(e){ return null }
-    }
-
-    function matchWildcardList(name, list){
-      if(!list?.length) return false;
-      return list.some(re => re.test(name));
-    }
-
-    function downloadCSV(rows){
-      const header = ["name","path","size","mtime","snippet"]; 
-      const esc = v => '"'+ String(v??"").replace(/"/g,'""') +'"';
-      const lines = [header.join(",")].concat(rows.map(r => [r.name, r.path, r.size, r.mtime, r.snippet?.replace(/<[^>]+>/g,"")].map(esc).join(",")));
-      const blob = new Blob(["\ufeff"+lines.join("\n")], {type:"text/csv"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "search_results.csv";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    // ====== Office/PDF テキスト抽出 ======
-    async function extractTextFromPDF(arrayBuffer){
-      try{
-        const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
-        const pdf = await loadingTask.promise;
-        let out = '';
-        const n = Math.min(pdf.numPages, 50); // 安全のため50ページまで
-        for(let i=1;i<=n;i++){
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          out += content.items.map(it=>it.str).join(' ') + '\n';
-        }
-        return out;
-      }catch(e){ console.warn('PDF抽出失敗', e); return ''; }
-    }
-
-    async function extractTextFromDocx(arrayBuffer){
-      try{
-        const res = await window.mammoth.convertToHtml({arrayBuffer});
-        const tmp = document.createElement('div');
-        tmp.innerHTML = res.value || '';
-        return tmp.textContent || '';
-      }catch(e){ console.warn('docx抽出失敗', e); return ''; }
-    }
-
-    async function extractTextFromXlsx(arrayBuffer){
-      try{
-        const wb = XLSX.read(arrayBuffer, {type:'array'});
-        let out = '';
-        for(const name of wb.SheetNames){
-          const ws = wb.Sheets[name];
-          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-          for(let r=range.s.r;r<=range.e.r;r++){
-            let row = [];
-            for(let c=range.s.c;c<=range.e.c;c++){
-              const cell = ws[XLSX.utils.encode_cell({r,c})];
-              if(cell && cell.v!=null) row.push(String(cell.v));
-            }
-            if(row.length) out += row.join('\t') + '\n';
-          }
-        }
-        return out;
-      }catch(e){ console.warn('xlsx抽出失敗', e); return ''; }
-    }
-
-    async function extractTextFromPptx(arrayBuffer){
-      try{
-        const zip = await JSZip.loadAsync(arrayBuffer);
-        const slideFiles = Object.keys(zip.files).filter(k=>/^ppt\/slides\/slide\d+\.xml$/.test(k)).sort();
-        let out = '';
-        for(const k of slideFiles){
-          const xml = await zip.file(k).async('string');
-          // a:t タグ内テキストを抽出
-          const matches = [...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map(m=>m[1].replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'));
-          if(matches.length) out += matches.join(' ') + '\n';
-        }
-        return out;
-      }catch(e){ console.warn('pptx抽出失敗', e); return ''; }
-    }
-
-    async function extractTextByExt(file){
-      const ext = extOf(file.name);
-      const buf = await file.arrayBuffer();
-      if(ext === '.pdf') return await extractTextFromPDF(buf);
-      if(ext === '.docx') return await extractTextFromDocx(buf);
-      if(ext === '.xlsx') return await extractTextFromXlsx(buf);
-      if(ext === '.pptx') return await extractTextFromPptx(buf);
-      // テキスト系
-      if(textExt.has(ext)){
-        const dec = new TextDecoder();
-        return dec.decode(buf);
+  $$('#searchBtn').onclick=async()=>{
+    if(!dirHandle)return alert('フォルダを選択');
+    const q=$$('#query').value.trim();if(!q)return alert('検索ワード入力');
+    const tbody=$$('#resultTable tbody');tbody.innerHTML='';
+    let count=0;
+    for await(const entry of walkDirectory(dirHandle)){
+      const file=await entry.getFile();const path=entry.name;const ext=file.name.split('.').pop().toLowerCase();
+      let matched=file.name.toLowerCase().includes(q.toLowerCase());let snippet='';
+      if(!matched&&$$('#fulltext').checked&&(textExt.has('.'+ext)||officeExt.has('.'+ext))){
+        const text=await extractText(file);
+        if(text.toLowerCase().includes(q.toLowerCase())){matched=true;snippet=highlight(text,q);}
       }
-      return '';
+      if(matched){
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${file.name}</td><td>${entry.fullPath||entry.name}</td><td>${snippet}</td>`;
+        const tdOp=document.createElement('td');
+        const btn=document.createElement('button');btn.textContent='フォルダを開く';btn.className='btn btn-secondary';
+        btn.onclick=()=>{window.open('file://'+(entry.fullPath||entry.name).replace(/\\/g,'/').replace(/^([A-Za-z]):/,'/$1:'),'_blank');};
+        tdOp.appendChild(btn);tr.appendChild(tdOp);tbody.appendChild(tr);count++;}
     }
-
-    // ====== 状態 ======
-    let dirHandle = null;           // File System Access API
-    let pickedFiles = [];           // 互換モード
-    let abortFlag = { value:false };
-    let results = [];
-
-    // ====== UI 要素 ======
-    const folderPath = $$("#folderPath");
-    const pickBtn = $$("#pickBtn");
-    const folderInput = $$("#folderInput");
-    const query = $$("#query");
-    const fulltext = $$("#fulltext");
-    const caseSens = $$("#caseSens");
-    const regex = $$("#regex");
-    const maxSize = $$("#maxSize");
-    const exclude = $$("#exclude");
-    const searchBtn = $$("#searchBtn");
-    const cancelBtn = $$("#cancelBtn");
-    const statusEl = $$("#status");
-    const bar = $$("#bar");
-    const tableBody = $$("#resultTable tbody");
-    const exportBtn = $$("#exportBtn");
-
-    // ====== フォルダ選択 ======
-    pickBtn.addEventListener("click", async () => {
-      if(!window.showDirectoryPicker){
-        alert("このブラウザはディレクトリ選択APIに未対応です。『互換モード』をご利用ください。");
-        return;
-      }
-      try{
-        dirHandle = await showDirectoryPicker({ mode:"read" });
-        pickedFiles = [];
-        folderPath.value = dirHandle.name || "(選択済み)";
-        statusEl.textContent = "フォルダ選択完了。検索ワードを入力してください。";
-      }catch(e){ if(e?.name !== 'AbortError') console.error(e); }
-    });
-
-    // ====== 互換モード ======
-    folderInput.addEventListener("change", () => {
-      pickedFiles = [...folderInput.files];
-      dirHandle = null;
-      if(pickedFiles.length){
-        const commonPath = pickedFiles[0].webkitRelativePath?.split("/")?.[0] ?? "(選択済み)";
-        folderPath.value = commonPath + "（互換モード）";
-        statusEl.textContent = `${pickedFiles.length} 件のファイルを読み込みました`;
-      }
-    });
-
-    // ====== ディレクトリ走査 ======
-    async function* walkDirectory(handle, excludeList){
-      for await (const [name, entry] of handle.entries()){
-        if(abortFlag.value) return;
-        if(matchWildcardList(name, excludeList)) continue;
-        if(entry.kind === 'directory'){
-          if(matchWildcardList(entry.name, excludeList)) continue;
-          yield* walkDirectory(entry, excludeList);
-        }else if(entry.kind === 'file'){
-          if(matchWildcardList(entry.name, excludeList)) continue;
-          yield entry;
-        }
-      }
-    }
-
-    // ====== 検索 ======
-    async function runSearch(){
-      const qRaw = query.value.trim();
-      if(!qRaw){ alert("検索ワードを入力してください。"); return; }
-      if(!dirHandle && pickedFiles.length===0){ alert("フォルダを選択してください。"); return; }
-
-      results = []; tableBody.innerHTML = ""; exportBtn.disabled = true;
-      abortFlag.value = false; cancelBtn.disabled = false; searchBtn.disabled = true; bar.style.width = '0%';
-      const excludeList = parseExclude(exclude.value);
-
-      const isRegex = regex.checked; const isCase = caseSens.checked; const isFull = fulltext.checked;
-      let nameMatcher, contentMatcher;
-      try{
-        if(isRegex){
-          nameMatcher = new RegExp(qRaw, isCase?"":"i");
-          contentMatcher = new RegExp(qRaw, isCase?"g":"gi");
-        }else{
-          const esc = qRaw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          nameMatcher = new RegExp(esc, isCase?"":"i");
-          contentMatcher = new RegExp(esc, isCase?"g":"gi");
-        }
-      }catch(e){ alert("正規表現が不正です: "+e.message); resetUI(); return; }
-
-      let total = 0, processed = 0, matched = 0;
-      if(pickedFiles.length){ total = pickedFiles.length; }
-      statusEl.textContent = "検索中…";
-
-      async function processFileLike(getFile, relPath){
-        if(abortFlag.value) return;
-        try{
-          const file = await getFile();
-          processed++;
-          if(!file) return;
-          const name = file.name;
-          const size = file.size;
-          const mtime = file.lastModified;
-          const ext = extOf(name);
-          if(matchWildcardList(name, excludeList)) return;
-
-          let nameHit = nameMatcher.test(name) || nameMatcher.test(relPath||"");
-          let snippet = null;
-
-          if(isFull){
-            const maxBytes = Number(maxSize.value || 20) * 1024 * 1024;
-            if(size <= maxBytes){
-              let text = '';
-              if(officeExt.has(ext) || textExt.has(ext)){
-                text = await extractTextByExt(file);
-              }
-              if(text && contentMatcher.test(text)){
-                nameHit = true;
-                snippet = hitSnippet(text, qRaw, isRegex, isCase);
-              }
-            }
-          }
-
-          if(nameHit){
-            matched++;
-            appendRow({ name, path: relPath||name, size: file.size, mtime: fmtDate(mtime), file, snippet });
-          }
-
-          if(total){ bar.style.width = Math.min(100, Math.floor((processed/total)*100))+"%"; }
-          statusEl.textContent = `${processed} 件処理 / 一致 ${matched} 件`;
-        }catch(e){ console.error(e); }
-      }
-
-      if(dirHandle){
-        let i=0;
-        for await (const entry of walkDirectory(dirHandle, excludeList)){
-          if(abortFlag.value) break;
-          const rel = entry.name;
-          await processFileLike(async ()=> await entry.getFile(), rel);
-          i++; if(i % 20 === 0){ await new Promise(r => setTimeout(r)); }
-        }
-      }else{
-        total = pickedFiles.length;
-        for(const f of pickedFiles){
-          if(abortFlag.value) break;
-          await processFileLike(async ()=> f, f.webkitRelativePath || f.name);
-        }
-      }
-
-      exportBtn.disabled = $$$('#resultTable tbody tr').length === 0;
-      statusEl.textContent = `完了：一致 ${matched} 件`;
-      resetUI();
-    }
-
-    function resetUI(){ cancelBtn.disabled = true; searchBtn.disabled = false; }
-
-    function appendRow(r){
-      const tr = document.createElement('tr');
-      const td = (html) => { const c=document.createElement('td'); c.innerHTML = html; return c; };
-      const openBtn = document.createElement('button');
-      openBtn.className = 'btn btn-secondary';
-      openBtn.textContent = '開く/保存';
-      openBtn.addEventListener('click', async ()=>{
-        try{
-          const blob = await r.file.arrayBuffer();
-          const b = new Blob([blob], {type: r.file.type || 'application/octet-stream'});
-          const url = URL.createObjectURL(b);
-          const a = document.createElement('a');
-          a.href = url; a.download = r.name; a.target = '_blank'; a.click();
-          setTimeout(()=>URL.revokeObjectURL(url), 2000);
-        }catch(e){ console.error(e); }
-      });
-
-      tr.appendChild(td(`<span class="badge">${r.name}</span>`));
-      tr.appendChild(td(`<span class="small">${r.path}</span>`));
-      tr.appendChild(td(`<span class="small">${toMB(r.size)}</span>`));
-      tr.appendChild(td(`<span class="small">${r.mtime}</span>`));
-      tr.appendChild(td(`<div class="small">${r.snippet||""}</div>`));
-      const actionTd = td(""); actionTd.appendChild(openBtn); tr.appendChild(actionTd);
-      $$('#resultTable tbody').appendChild(tr);
-    }
-
-    // ====== イベント ======
-    $$('#searchBtn').addEventListener("click", runSearch);
-    $$('#cancelBtn').addEventListener("click", ()=>{ abortFlag.value = true; $$('#status').textContent = "中止しました"; resetUI(); });
-    $$('#exportBtn').addEventListener("click", ()=>{
-      const rows = $$$('#resultTable tbody tr').map(tr=>{
-        const tds = $$$('td', tr);
-        return {
-          name: tds[0]?.innerText?.trim(),
-          path: tds[1]?.innerText?.trim(),
-          size: tds[2]?.innerText?.trim(),
-          mtime: tds[3]?.innerText?.trim(),
-          snippet: tds[4]?.innerText?.trim(),
-        }
-      });
-      downloadCSV(rows);
-    });
-    $$('#query').addEventListener('keydown', e=>{ if(e.key==='Enter'){ runSearch(); }});
-  </script>
+    $$('#status').textContent=`検索完了 (${count} 件)`;
+  }
+</script>
 </body>
 </html>
